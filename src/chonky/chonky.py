@@ -30,11 +30,10 @@ def split_into_semantic_chunks(text, ners):
     yield text[begin_index:]
 
 
-class Chonky:
-    def __init__(self, device="cuda"):
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            "distilbert/distilbert-base-uncased"
-        )
+class TextSplitter:
+    def __init__(self, model_name="mirth/chonky_distilbert_uncased_1", device="cpu"):
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+
         id2label = {
             0: "O",
             1: "separator",
@@ -45,7 +44,7 @@ class Chonky:
         }
 
         model = AutoModelForTokenClassification.from_pretrained(
-            "./bookcorpus_model_5m/checkpoint-26520",
+            model_name,
             num_labels=2,
             id2label=id2label,
             label2id=label2id,
@@ -70,11 +69,11 @@ class Chonky:
 
 if __name__ == "__main__":
     with open(
-        "data/paul_graham_essay_no_new_line/paul_graham_essay_no_new_line.txt"
+        "../../data/paul_graham_essay_no_new_line/paul_graham_essay_no_new_line.txt"
     ) as file:
         pg = file.read()
 
-    c = Chonky(device="cuda")
+    c = TextSplitter(device="cuda")
     for sem_chunk in c(pg):
         print(sem_chunk)
         print("--")

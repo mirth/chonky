@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "chonky"
+version = "0.1.0"
+authors = [
+  { name="mirth" },
+]
+description = "Chonky is a Python library that intelligently segments text into meaningful semantic chunks using a fine-tuned transformer model."
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research"
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+dependencies = [
+  "transformers"
+]
+keywords = ["NLP", "RAG", "text splitter"]
+
+[project.urls]
+Homepage = "https://github.com/mirth/chonky"
+Issues = "https://github.com/mirth/chonky/issues"
