@@ -2,6 +2,12 @@
 
 __Chonky__ is a Python library that intelligently segments text into meaningful semantic chunks using a fine-tuned transformer model. This library can be used in the RAG systems.
 
+## Installation
+
+```
+pip install chonky
+```
+
 Usage:
 
 ```
@@ -16,3 +22,7 @@ for chunk in splitter(text):
   print(chunk)
   print("--")
 ```
+
+## Transformer model
+
+[mirth/chonky_distilbert_base_uncased_1](https://huggingface.co/mirth/chonky_distilbert_base_uncased_1)
