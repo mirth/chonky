@@ -7,10 +7,11 @@ def split_into_chunks(lst, n):
 
 
 def split_text_into_even_chunks(tokenizer, text):
-    ids = tokenizer(text, truncation=False, add_special_tokens=False)
-    ids = ids["input_ids"]
-    ids = split_into_chunks(ids, n=tokenizer.model_max_length)
-    chunks = (tokenizer.decode(chunk_ids) for chunk_ids in ids)
+    ids_plus = tokenizer(text, truncation=False, add_special_tokens=False, return_offsets_mapping=True)
+    token_offset_tups = ids_plus["offset_mapping"]
+    offset_tup_chunks = split_into_chunks(token_offset_tups, n=tokenizer.model_max_length)
+    # Map token chunks back to text chunks by using the start index of the first token and the end index of the last token
+    chunks = (text[offset_tup_chunk[0][0]:offset_tup_chunk[-1][1]] for offset_tup_chunk in offset_tup_chunks)
 
     return chunks
 
