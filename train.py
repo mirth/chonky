@@ -9,14 +9,83 @@ from transformers import (
     DataCollatorForTokenClassification,
 )
 
+def distilbert():
+    id2label = {
+        0: "O",
+        1: "separator",
+    }
+    label2id = {
+        "O": 0,
+        "separator": 1,
+    }
+
+    model = AutoModelForTokenClassification.from_pretrained(
+        model_name, num_labels=2, id2label=id2label, label2id=label2id
+    )
+
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+    return model, tokenizer
+
+def distilmodernbert():
+    import torch
+    # from peft import (
+    #     get_peft_model,
+    #     LoraConfig,
+    #     TaskType
+    # )
+
+
+    id2label = {
+        0: "O",
+        1: "separator",
+    }
+    label2id = {
+        "O": 0,
+        "separator": 1,
+    }
+    model_name = "answerdotai/ModernBERT-base"
+
+    model = AutoModelForTokenClassification.from_pretrained(
+        model_name, num_labels=2, id2label=id2label, label2id=label2id,
+        _attn_implementation='sdpa', reference_compile=False
+    )
+    layers_to_remove = [13, 14, 16, 17, 19, 20]
+    model.model.layers = torch.nn.ModuleList([
+        layer for idx, layer in enumerate(model.model.layers)
+        if idx not in layers_to_remove
+    ])
+    state_dict = torch.load("distilmodernbert/model.pt")
+    model.model.load_state_dict(state_dict)
+
+
+    # peft_config = LoraConfig(
+    #     task_type=TaskType.FEATURE_EXTRACTION,
+    #     inference_mode=False,
+    #     r=64,
+    #     lora_alpha=64,
+    #     lora_dropout=0.1, 
+    #     bias="all",
+    #     target_modules=['Wqkv', 'Wo', 'Wi'],
+    # )
+    # model = get_peft_model(model, peft_config)
+    # model.print_trainable_parameters()
+    # print(model)
+
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+    return model, tokenizer
 
 def main():
-    model_name = "distilbert/distilbert-base-uncased"
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model, tokenizer = distilmodernbert()
+    
+    # dataset = load_from_disk("data/refined-bookcorpus-dataset_hf100p_split")
     dataset = load_from_disk("data/refined-bookcorpus-dataset_hf_split")
     print(dataset)
+    # dataset_val = dataset["test"]
+    # dataset_train = dataset["train"]
     dataset_val = dataset["test"]
-    dataset_train = dataset["train"]
+    dataset_train = dataset["test"]
     label_list = ["O", "separator"]
     seqeval = evaluate.load("seqeval")
 
@@ -72,25 +141,14 @@ def main():
     tokenized_dataset_train = dataset_train.map(tokenize_and_align_labels, batched=True)
     tokenized_dataset_val = dataset_val.map(tokenize_and_align_labels, batched=True)
 
-    id2label = {
-        0: "O",
-        1: "separator",
-    }
-    label2id = {
-        "O": 0,
-        "separator": 1,
-    }
 
-    model = AutoModelForTokenClassification.from_pretrained(
-        model_name, num_labels=2, id2label=id2label, label2id=label2id
-    )
 
     data_collator = DataCollatorForTokenClassification(tokenizer=tokenizer)
     training_args = TrainingArguments(
         output_dir="bookcorpus_model",
         learning_rate=2e-5,
-        per_device_train_batch_size=56,
-        per_device_eval_batch_size=56,
+        per_device_train_batch_size=4,
+        per_device_eval_batch_size=4,
         num_train_epochs=100,
         weight_decay=0.01,
         eval_strategy="epoch",
