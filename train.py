@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 import evaluate
 from datasets import load_from_disk
 from transformers import (
@@ -9,10 +10,59 @@ from transformers import (
     DataCollatorForTokenClassification,
 )
 
+torch.set_float32_matmul_precision("high")
 
-def main():
+
+def distilbert():
+    id2label = {
+        0: "O",
+        1: "separator",
+    }
+    label2id = {
+        "O": 0,
+        "separator": 1,
+    }
+
     model_name = "distilbert/distilbert-base-uncased"
+    model = AutoModelForTokenClassification.from_pretrained(
+        model_name, num_labels=2, id2label=id2label, label2id=label2id
+    )
+
     tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+    return model, tokenizer
+
+
+def modernbert():
+    id2label = {
+        0: "O",
+        1: "separator",
+    }
+    label2id = {
+        "O": 0,
+        "separator": 1,
+    }
+    model_name = "answerdotai/ModernBERT-base"
+
+    model = AutoModelForTokenClassification.from_pretrained(
+        model_name,
+        num_labels=2,
+        id2label=id2label,
+        label2id=label2id,
+        _attn_implementation="flash_attention_2",
+    )
+
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+    return model, tokenizer
+
+
+def main(batch_size, max_seq_len=None):
+    model, tokenizer = modernbert()
+
+    if max_seq_len is None:
+        max_seq_len = tokenizer.model_max_length
+
     dataset = load_from_disk("data/refined-bookcorpus-dataset_hf_split")
     print(dataset)
     dataset_val = dataset["test"]
@@ -22,7 +72,10 @@ def main():
 
     def tokenize_and_align_labels(examples):
         tokenized_inputs = tokenizer(
-            examples["tokens"], truncation=True, is_split_into_words=True
+            examples["tokens"],
+            truncation=True,
+            is_split_into_words=True,
+            max_length=max_seq_len,
         )
 
         labels = []
@@ -72,25 +125,12 @@ def main():
     tokenized_dataset_train = dataset_train.map(tokenize_and_align_labels, batched=True)
     tokenized_dataset_val = dataset_val.map(tokenize_and_align_labels, batched=True)
 
-    id2label = {
-        0: "O",
-        1: "separator",
-    }
-    label2id = {
-        "O": 0,
-        "separator": 1,
-    }
-
-    model = AutoModelForTokenClassification.from_pretrained(
-        model_name, num_labels=2, id2label=id2label, label2id=label2id
-    )
-
     data_collator = DataCollatorForTokenClassification(tokenizer=tokenizer)
     training_args = TrainingArguments(
-        output_dir="bookcorpus_model",
+        output_dir="modernbert_bookcorpus_model",
         learning_rate=2e-5,
-        per_device_train_batch_size=56,
-        per_device_eval_batch_size=56,
+        per_device_train_batch_size=batch_size,
+        per_device_eval_batch_size=batch_size,
         num_train_epochs=100,
         weight_decay=0.01,
         eval_strategy="epoch",
@@ -113,4 +153,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(batch_size=80, max_seq_len=1024)

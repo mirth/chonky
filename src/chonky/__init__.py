@@ -7,11 +7,18 @@ def split_into_chunks(lst, n):
 
 
 def split_text_into_even_chunks(tokenizer, text):
-    ids_plus = tokenizer(text, truncation=False, add_special_tokens=False, return_offsets_mapping=True)
+    ids_plus = tokenizer(
+        text, truncation=False, add_special_tokens=False, return_offsets_mapping=True
+    )
     token_offset_tups = ids_plus["offset_mapping"]
-    offset_tup_chunks = split_into_chunks(token_offset_tups, n=tokenizer.model_max_length)
+    offset_tup_chunks = split_into_chunks(
+        token_offset_tups, n=tokenizer.model_max_length
+    )
     # Map token chunks back to text chunks by using the start index of the first token and the end index of the last token
-    chunks = (text[offset_tup_chunk[0][0]:offset_tup_chunk[-1][1]] for offset_tup_chunk in offset_tup_chunks)
+    chunks = (
+        text[offset_tup_chunk[0][0] : offset_tup_chunk[-1][1]]
+        for offset_tup_chunk in offset_tup_chunks
+    )
 
     return chunks
 
@@ -23,7 +30,7 @@ def split_into_semantic_chunks(text, ners):
         for ner in ners:
             if i == ner["end"]:
                 chunk = text[begin_index : ner["end"]]
-                chunk = chunk.strip()
+
                 yield chunk
 
                 begin_index = ner["end"]
@@ -32,8 +39,8 @@ def split_into_semantic_chunks(text, ners):
 
 
 class TextSplitter:
-    def __init__(self, model_name="mirth/chonky_distilbert_uncased_1", device="cpu"):
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+    def __init__(self, model_id="mirth/chonky_distilbert_uncased_1", device="cpu"):
+        self.tokenizer = AutoTokenizer.from_pretrained(model_id)
 
         id2label = {
             0: "O",
@@ -45,7 +52,7 @@ class TextSplitter:
         }
 
         model = AutoModelForTokenClassification.from_pretrained(
-            model_name,
+            model_id,
             num_labels=2,
             id2label=id2label,
             label2id=label2id,
