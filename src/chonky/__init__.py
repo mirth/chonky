@@ -6,13 +6,13 @@ def split_into_chunks(lst, n):
         yield lst[i : i + n]
 
 
-def split_text_into_even_chunks(tokenizer, text):
+def split_text_into_even_chunks(tokenizer, text, chunk_size):
     ids_plus = tokenizer(
         text, truncation=False, add_special_tokens=False, return_offsets_mapping=True
     )
     token_offset_tups = ids_plus["offset_mapping"]
     offset_tup_chunks = split_into_chunks(
-        token_offset_tups, n=tokenizer.model_max_length
+        token_offset_tups, n=chunk_size
     )
     # Map token chunks back to text chunks by using the start index of the first token and the end index of the last token
     chunks = (
@@ -67,7 +67,12 @@ class TextSplitter:
         )
 
     def __call__(self, text):
-        text_chunks = split_text_into_even_chunks(self.tokenizer, text)
+        model_class_name = type(self.pipe.model).__name__
+        if model_class_name.startswith("ModernBert"):
+            chunk_size = 1024
+        else:
+            chunk_size = self.tokenizer.model_max_length
+        text_chunks = split_text_into_even_chunks(self.tokenizer, text, chunk_size)
 
         for text_chunk in text_chunks:
             output = self.pipe(text_chunk)
