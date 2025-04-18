@@ -45,10 +45,26 @@ def model_chonky(model_id, **kwargs):
     return predict
 
 
-def model_chonkie(embedding_model):
+def model_chonkie_semantic(embedding_model):
     from chonkie import SemanticChunker
 
     chunker = SemanticChunker(embedding_model=embedding_model)
+
+    def predict(x):
+        chunks = chunker(x)
+
+        pred_char_indices = [chunk.end_index for chunk in chunks]
+        try_fix_last_index(x, pred_char_indices)
+
+        return ner_seq_from(x, pred_char_indices)
+
+    return predict
+
+
+def model_chonkie_recursive():
+    from chonkie import RecursiveChunker
+
+    chunker = RecursiveChunker()
 
     def predict(x):
         chunks = chunker(x)
@@ -112,6 +128,29 @@ def model_langchain_semantic_chunker(embedding_model):
 
     hf_embeddings = HuggingFaceEmbeddings(model_name=embedding_model)
     splitter = SemanticChunker(hf_embeddings)
+
+    def predict(x):
+        docs = splitter.create_documents([x])
+
+        last_char_idx = 0
+        pred_char_indices = []
+
+        for doc in docs:
+            last_char_idx += len(doc.page_content)
+
+            pred_char_indices.append(last_char_idx + 1)
+
+        try_fix_last_index(x, pred_char_indices)
+
+        return ner_seq_from(x, pred_char_indices)
+
+    return predict
+
+
+def model_langchain_recursive_chunker():
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+    splitter = RecursiveCharacterTextSplitter(chunk_overlap=0)
 
     def predict(x):
         docs = splitter.create_documents([x])
@@ -196,7 +235,7 @@ def pretty_print_metrics(all_metrics):
         rows.append(row)
         is_header_set = True
 
-    print(tabulate(rows, headers=headers))
+    print(tabulate(rows, headers=headers, tablefmt="github"))
 
 
 def main():
@@ -209,16 +248,16 @@ def main():
 
     models = [
         (
-            "SaT sat-12l-sm do_ps=True",
+            "SaT(sat-12l-sm, do_ps=True)",
             model_sat("sat-12l-sm", do_paragraph_segmentation=True),
         ),
         (
-            "SaT sat-12l-sm do_ps=False",
+            "SaT(sat-12l-sm, do_ps=False)",
             model_sat("sat-12l-sm", do_paragraph_segmentation=False),
         ),
         ("SaT sat-3l do_ps=True", model_sat("sat-3l", do_paragraph_segmentation=True)),
         (
-            "SaT sat-3l do_ps=False",
+            "SaT(sat-3l, do_ps=False)",
             model_sat("sat-3l", do_paragraph_segmentation=False),
         ),
         (
@@ -234,40 +273,43 @@ def main():
             ),
         ),
         (
-            "chonkIE SemanticChunker + potion-base-8M",
-            model_chonkie(embedding_model="minishlab/potion-base-8M"),
+            "chonkIE SemanticChunker(potion-base-8M)",
+            model_chonkie_semantic(embedding_model="minishlab/potion-base-8M"),
         ),
         (
-            "chonkIE SemanticChunker + bge-small-en-v1.5",
-            model_chonkie(embedding_model="BAAI/bge-small-en-v1.5"),
+            "chonkIE SemanticChunker(bge-small-en-v1.5)",
+            model_chonkie_semantic(embedding_model="BAAI/bge-small-en-v1.5"),
         ),
+        ("chonkIE RecursiveChunker", model_chonkie_recursive()),
         (
-            "llamaindex SemanticSplitter + bge-small-en-v1.5",
+            "llamaindex SemanticSplitter(bge-small-en-v1.5)",
             model_llama_index_semantic_splitter(
                 embedding_model="BAAI/bge-small-en-v1.5"
             ),
         ),
         (
-            "langchain SemanticChunker all-mpnet-base-v2",
+            "langchain SemanticChunker(all-mpnet-base-v2)",
             model_langchain_semantic_chunker(
                 embedding_model="sentence-transformers/all-mpnet-base-v2"
             ),
         ),
         (
-            "langchain SemanticChunker bge-small-en-v1.5",
+            "langchain SemanticChunker(bge-small-en-v1.5)",
             model_langchain_semantic_chunker(embedding_model="BAAI/bge-small-en-v1.5"),
         ),
         (
-            "langchain SemanticChunker potion-base-8M",
+            "langchain SemanticChunker(potion-base-8M)",
             model_langchain_semantic_chunker(
                 embedding_model="minishlab/potion-base-8M"
             ),
         ),
+        ("langchain RecursiveChar", model_langchain_recursive_chunker()),
     ]
 
     all_metrics = defaultdict(list)
     for dataset_name in dataset_names:
         eval_dataset = load_from_disk(f"data/{dataset_name}")
+        eval_dataset = eval_dataset[:1000000]
 
         results, gts = eval_loop(eval_dataset, models)
 

@@ -40,11 +40,34 @@ The first programs I tried writing were on the IBM 1401 that our school district
 
 ## Supported models
 
-| Model ID    | F1 | Precision | Recall | Accuracy|
-| -------- | ------- | ------- | ------- | ------- |
-| [mirth/chonky_modernbert_base_1](https://huggingface.co/mirth/chonky_modernbert_base_1) | 0.79 | 0.83 | 0.75 | 0.99 |
-| [mirth/chonky_distilbert_base_uncased_1](https://huggingface.co/mirth/chonky_distilbert_base_uncased_1)  | 0.7 | 0.79 | 0.63 | 0.99 |
+| Model ID    | F1 | Precision | Recall | Accuracy | Seq Length |
+| -------- | ------- | ------- | ------- | ------- | ---------- |
+| [mirth/chonky_modernbert_base_1](https://huggingface.co/mirth/chonky_modernbert_base_1) | 0.79 | 0.83 | 0.75 | 0.99 | 1024 |
+| [mirth/chonky_distilbert_base_uncased_1](https://huggingface.co/mirth/chonky_distilbert_base_uncased_1)  | 0.7 | 0.79 | 0.63 | 0.99 | 512 |
 
 Metrics above are token based.
 
-More benchmarks are coming soon.
+## Benchmarks
+
+The following values are character based F1 scores computed on first 1M characters of each datasets (due to performance reasons).
+
+The `bookcorpus` dataset here is basically Chonky validation set so may be it's a bit unfair to list it here.
+
+The `do_ps` fragment for SaT models here is `do_paragraph_segmentation` flag.
+
+| Model                                          |   20_newsgroups     |    bookcorpus    |   en_judgements |   paul_graham |
+|------------------------------------------------|---------------------|------------------|-----------------|---------------|
+| chonkY_modernbert                              |            0.15     |         __0.72__ |        __0.08__ |      __0.63__ |
+| chonkY_distilbert                              |            0.15     |         0.69     |            0.05 |          0.52 |
+| SaT(sat-12l-sm, do_ps=False)                   |            __0.31__ |         0.33     |            0.03 |          0.43 |
+| SaT(sat-12l-sm, do_ps=True)                    |            0.3      |         0.33     |            0.06 |          0.42 |
+| SaT(sat-3l, do_ps=False)                       |            0.34     |         0.28     |            0.03 |          0.42 |
+| SaT(sat-3l, do_ps=True)                        |            0.15     |         0.09     |            0.07 |          0.41 |
+| chonkIE SemanticChunker(bge-small-en-v1.5)     |            0.06     |         0.21     |            0.01 |          0.12 |
+| chonkIE SemanticChunker(potion-base-8M)        |            0.08     |         0.19     |            0.01 |          0.15 |
+| chonkIE RecursiveChunker                       |            0.02     |         0.07     |            0.01 |          0.05 |
+| langchain SemanticChunker(all-mpnet-base-v2)   |            0        |         0        |            0    |          0    |
+| langchain SemanticChunker(bge-small-en-v1.5)   |            0        |         0        |            0    |          0    |
+| langchain SemanticChunker(potion-base-8M)      |            0        |         0        |            0    |          0    |
+| langchain RecursiveChar                        |            0        |         0        |            0    |          0    |
+| llamaindex SemanticSplitter(bge-small-en-v1.5) |            0.02     |         0.06     |            0    |          0.06 |
