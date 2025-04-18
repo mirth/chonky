@@ -4,14 +4,10 @@ from transformers import AutoTokenizer, AutoModelForTokenClassification, pipelin
 def split_into_semantic_chunks(text, ners):
     begin_index = 0
 
-    for i, _c in enumerate(text):
-        for ner in ners:
-            if i == ner["end"]:
-                chunk = text[begin_index : ner["end"]]
-
-                yield chunk
-
-                begin_index = ner["end"]
+    for ner in ners:
+        chunk = text[begin_index : ner["end"]]
+        yield chunk
+        begin_index = ner["end"]
 
     yield text[begin_index:]
 
