@@ -55,19 +55,19 @@ The `bookcorpus` dataset here is basically Chonky validation set so may be it's 
 
 The `do_ps` fragment for SaT models here is `do_paragraph_segmentation` flag.
 
-| Model                                          |   20_newsgroups     |    bookcorpus    |   en_judgements |   paul_graham |
-|------------------------------------------------|---------------------|------------------|-----------------|---------------|
-| chonkY_modernbert                              |            0.15     |         __0.72__ |        __0.08__ |      __0.63__ |
-| chonkY_distilbert                              |            0.15     |         0.69     |            0.05 |          0.52 |
-| SaT(sat-12l-sm, do_ps=False)                   |            __0.31__ |         0.33     |            0.03 |          0.43 |
-| SaT(sat-12l-sm, do_ps=True)                    |            0.3      |         0.33     |            0.06 |          0.42 |
-| SaT(sat-3l, do_ps=False)                       |            0.34     |         0.28     |            0.03 |          0.42 |
-| SaT(sat-3l, do_ps=True)                        |            0.15     |         0.09     |            0.07 |          0.41 |
-| chonkIE SemanticChunker(bge-small-en-v1.5)     |            0.06     |         0.21     |            0.01 |          0.12 |
-| chonkIE SemanticChunker(potion-base-8M)        |            0.08     |         0.19     |            0.01 |          0.15 |
-| chonkIE RecursiveChunker                       |            0.02     |         0.07     |            0.01 |          0.05 |
-| langchain SemanticChunker(all-mpnet-base-v2)   |            0        |         0        |            0    |          0    |
-| langchain SemanticChunker(bge-small-en-v1.5)   |            0        |         0        |            0    |          0    |
-| langchain SemanticChunker(potion-base-8M)      |            0        |         0        |            0    |          0    |
-| langchain RecursiveChar                        |            0        |         0        |            0    |          0    |
-| llamaindex SemanticSplitter(bge-small-en-v1.5) |            0.02     |         0.06     |            0    |          0.06 |
+| Model                                          |   20_newsgroups       |      bookcorpus     |    en_judgements  |   paul_graham    |
+|------------------------------------------------|-----------------------|---------------------|-------------------|------------------|
+| chonkY_modernbert                              |            0.15       |         __0.72__ ❗ |        __0.08__ ❗ |      __0.63__ ❗ |
+| chonkY_distilbert                              |            0.15       |         0.69        |            0.05   |          0.52    |
+| SaT(sat-12l-sm, do_ps=False)                   |            0.31       |         0.33        |            0.03   |          0.43    |
+| SaT(sat-12l-sm, do_ps=True)                    |            0.3        |         0.33        |            0.06   |          0.42    |
+| SaT(sat-3l, do_ps=False)                       |            __0.34__ ❗ |         0.28       |            0.03   |          0.42    |
+| SaT(sat-3l, do_ps=True)                        |            0.15       |         0.09        |            0.07   |          0.41    |
+| chonkIE SemanticChunker(bge-small-en-v1.5)     |            0.06       |         0.21        |            0.01   |          0.12    |
+| chonkIE SemanticChunker(potion-base-8M)        |            0.08       |         0.19        |            0.01   |          0.15    |
+| chonkIE RecursiveChunker                       |            0.02       |         0.07        |            0.01   |          0.05    |
+| langchain SemanticChunker(all-mpnet-base-v2)   |            0          |         0           |            0      |          0       |
+| langchain SemanticChunker(bge-small-en-v1.5)   |            0          |         0           |            0      |          0       |
+| langchain SemanticChunker(potion-base-8M)      |            0          |         0           |            0      |          0       |
+| langchain RecursiveChar                        |            0          |         0           |            0      |          0       |
+| llamaindex SemanticSplitter(bge-small-en-v1.5) |            0.02       |         0.06        |            0      |          0.06    |
