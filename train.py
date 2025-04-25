@@ -10,10 +10,10 @@ from transformers import (
     DataCollatorForTokenClassification,
 )
 
-torch.set_float32_matmul_precision("high")
+# torch.set_float32_matmul_precision("high")
 
 
-def distilbert():
+def distilbert(model_name):
     id2label = {
         0: "O",
         1: "separator",
@@ -23,7 +23,6 @@ def distilbert():
         "separator": 1,
     }
 
-    model_name = "distilbert/distilbert-base-uncased"
     model = AutoModelForTokenClassification.from_pretrained(
         model_name, num_labels=2, id2label=id2label, label2id=label2id
     )
@@ -57,13 +56,14 @@ def modernbert():
     return model, tokenizer
 
 
-def main(batch_size, max_seq_len=None):
-    model, tokenizer = modernbert()
+def main(dataset_id, model_id, output_dir, batch_size, max_seq_len=None):
+    # model, tokenizer = modernbert()
+    model, tokenizer = distilbert(model_name=model_id)
 
     if max_seq_len is None:
         max_seq_len = tokenizer.model_max_length
 
-    dataset = load_from_disk("data/refined-bookcorpus-dataset_hf_split")
+    dataset = load_from_disk(dataset_id)
     print(dataset)
     dataset_val = dataset["test"]
     dataset_train = dataset["train"]
@@ -127,7 +127,7 @@ def main(batch_size, max_seq_len=None):
 
     data_collator = DataCollatorForTokenClassification(tokenizer=tokenizer)
     training_args = TrainingArguments(
-        output_dir="modernbert_bookcorpus_model",
+        output_dir=output_dir,
         learning_rate=2e-5,
         per_device_train_batch_size=batch_size,
         per_device_eval_batch_size=batch_size,
@@ -153,4 +153,14 @@ def main(batch_size, max_seq_len=None):
 
 
 if __name__ == "__main__":
-    main(batch_size=80, max_seq_len=1024)
+    # dataset_id="data/minipile_distilbert-base-cased512"
+    # dataset_id="data/refined-bookcorpus-dataset_hf_split"
+    main(
+        # dataset_id="data/minipile_distilbert-base-uncased512",
+        # model_id="distilbert/distilbert-base-uncased",
+        dataset_id='data/refined-bookcorpus-dataset_hf_distilbert-base-uncased512',
+        model_id="distilbert-base-uncased_minipile/checkpoint-79292",
+        output_dir="distilbert-base-uncased_minipile_plus_bookcorpus",
+        batch_size=56,
+        max_seq_len=None,
+    )
