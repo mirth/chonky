@@ -10,7 +10,7 @@ from transformers import (
     DataCollatorForTokenClassification,
 )
 
-# torch.set_float32_matmul_precision("high")
+torch.set_float32_matmul_precision("high")
 
 
 def distilbert(model_name):
@@ -32,7 +32,7 @@ def distilbert(model_name):
     return model, tokenizer
 
 
-def modernbert():
+def modernbert(model_id):
     id2label = {
         0: "O",
         1: "separator",
@@ -41,24 +41,23 @@ def modernbert():
         "O": 0,
         "separator": 1,
     }
-    model_name = "answerdotai/ModernBERT-base"
 
     model = AutoModelForTokenClassification.from_pretrained(
-        model_name,
+        model_id,
         num_labels=2,
         id2label=id2label,
         label2id=label2id,
         _attn_implementation="flash_attention_2",
     )
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
 
     return model, tokenizer
 
 
 def main(dataset_id, model_id, output_dir, batch_size, max_seq_len=None):
-    # model, tokenizer = modernbert()
-    model, tokenizer = distilbert(model_name=model_id)
+    model, tokenizer = modernbert(model_id=model_id)
+    # model, tokenizer = distilbert(model_name=model_id)
 
     if max_seq_len is None:
         max_seq_len = tokenizer.model_max_length
@@ -131,12 +130,13 @@ def main(dataset_id, model_id, output_dir, batch_size, max_seq_len=None):
         learning_rate=2e-5,
         per_device_train_batch_size=batch_size,
         per_device_eval_batch_size=batch_size,
-        num_train_epochs=100,
+        num_train_epochs=25,
         weight_decay=0.01,
         eval_strategy="epoch",
         save_strategy="epoch",
         load_best_model_at_end=True,
         push_to_hub=False,
+        fp16=True,
     )
 
     trainer = Trainer(
@@ -153,14 +153,10 @@ def main(dataset_id, model_id, output_dir, batch_size, max_seq_len=None):
 
 
 if __name__ == "__main__":
-    # dataset_id="data/minipile_distilbert-base-cased512"
-    # dataset_id="data/refined-bookcorpus-dataset_hf_split"
     main(
-        # dataset_id="data/minipile_distilbert-base-uncased512",
-        # model_id="distilbert/distilbert-base-uncased",
-        dataset_id='data/refined-bookcorpus-dataset_hf_distilbert-base-uncased512',
-        model_id="distilbert-base-uncased_minipile/checkpoint-79292",
-        output_dir="distilbert-base-uncased_minipile_plus_bookcorpus",
-        batch_size=56,
-        max_seq_len=None,
+        dataset_id="data/refined-bookcorpus-dataset_hf_ModernBERT-base1024",
+        model_id="modernbert_large_minipile/checkpoint-54717",
+        output_dir="modernbert_large_minipile_plus_bookcorpus",
+        batch_size=64,
+        max_seq_len=1024,
     )
