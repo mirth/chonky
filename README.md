@@ -47,7 +47,6 @@ The first programs I tried writing were on the IBM 1401 that our school district
 | [mirth/chonky_modernbert_base_1](https://huggingface.co/mirth/chonky_modernbert_base_1)                  | 1024       | 150M             |
 | [mirth/chonky_distilbert_base_uncased_1](https://huggingface.co/mirth/chonky_distilbert_base_uncased_1)  | 512        | 66.4M            |
 
-Metrics above are token based.
 
 ## Benchmarks
 
