@@ -21,9 +21,9 @@ def try_fix_last_index(text, indices):
 
 
 def model_chonky(model_id, **kwargs):
-    from src.chonky import TextSplitter
+    from src.chonky import ParagraphSplitter
 
-    splitter = TextSplitter(
+    splitter = ParagraphSplitter(
         model_id=model_id,
         device="cuda",
         **kwargs,

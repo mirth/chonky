@@ -11,13 +11,13 @@ pip install chonky
 Usage:
 
 ```python
-from chonky import TextSplitter
+from chonky import ParagraphSplitter
 
 # on the first run it will download the transformer model
-splitter = TextSplitter(device="cpu")
+splitter = ParagraphSplitter(device="cpu")
 
 # Or you can select the model
-# splitter = TextSplitter(
+# splitter = ParagraphSplitter(
 #  model_id="mirth/chonky_modernbert_base_1",
 #  device="cpu"
 # )

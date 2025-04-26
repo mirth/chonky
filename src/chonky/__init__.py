@@ -12,7 +12,7 @@ def split_into_semantic_chunks(text, ners):
     yield text[begin_index:]
 
 
-class TextSplitter:
+class ParagraphSplitter:
     def __init__(
         self, model_id="mirth/chonky_distilbert_uncased_1", device="cpu", **model_kwargs
     ):
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     ) as file:
         pg = file.read()
 
-    c = TextSplitter(device="cuda")
+    c = ParagraphSplitter(device="cuda")
     for sem_chunk in c(pg):
         print(sem_chunk)
         print("--")
