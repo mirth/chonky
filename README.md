@@ -8,7 +8,7 @@ __Chonky__ is a Python library that intelligently segments text into meaningful 
 pip install chonky
 ```
 
-Usage:
+## Usage:
 
 ```python
 from chonky import ParagraphSplitter
@@ -27,9 +27,10 @@ text = """Before college the two main things I worked on, outside of school, wer
 for chunk in splitter(text):
   print(chunk)
   print("--")
+```
 
-# Output
-
+### Sample Output
+```
 Before college the two main things I worked on, outside of school, were writing and programming. I didn't write essays. I wrote what beginning writers were supposed to write then, and probably still are: short stories. My stories were awful. They had hardly any plot, just characters with strong feelings, which I imagined made them deep.
 --
 The first programs I tried writing were on the IBM 1401 that our school district used for what was then called "data processing." This was in 9th grade, so I was 13 or 14. The school district's 1401 happened to be in the basement of our junior high school, and my friend Rich Draves and I got permission to use it.
