@@ -40,10 +40,11 @@ The first programs I tried writing were on the IBM 1401 that our school district
 
 ## Supported models
 
-| Model ID    | F1 | Precision | Recall | Accuracy | Seq Length |
-| -------- | ------- | ------- | ------- | ------- | ---------- |
-| [mirth/chonky_modernbert_base_1](https://huggingface.co/mirth/chonky_modernbert_base_1) | 0.79 | 0.83 | 0.75 | 0.99 | 1024 |
-| [mirth/chonky_distilbert_base_uncased_1](https://huggingface.co/mirth/chonky_distilbert_base_uncased_1)  | 0.7 | 0.79 | 0.63 | 0.99 | 512 |
+| Model ID                                                                                                 | Seq Length | Number of Params |
+| -------------------------------------------------------------------------------------------------------- | ---------- | ---------------- |
+| [mirth/chonky_modernbert_large_1](https://huggingface.co/mirth/chonky_modernbert_large_1)                | 1024       | 396M             |
+| [mirth/chonky_modernbert_base_1](https://huggingface.co/mirth/chonky_modernbert_base_1)                  | 1024       | 150M             |
+| [mirth/chonky_distilbert_base_uncased_1](https://huggingface.co/mirth/chonky_distilbert_base_uncased_1)  | 512        | 66.4M            |
 
 Metrics above are token based.
 
@@ -55,19 +56,20 @@ The `bookcorpus` dataset here is basically Chonky validation set so may be it's 
 
 The `do_ps` fragment for SaT models here is `do_paragraph_segmentation` flag.
 
-| Model                                          |   20_newsgroups       |      bookcorpus     |    en_judgements  |   paul_graham    |
-|------------------------------------------------|-----------------------|---------------------|-------------------|------------------|
-| chonkY_modernbert                              |            0.15       |         __0.72__ ❗ |        __0.08__ ❗ |      __0.63__ ❗ |
-| chonkY_distilbert                              |            0.15       |         0.69        |            0.05   |          0.52    |
-| SaT(sat-12l-sm, do_ps=False)                   |            0.31       |         0.33        |            0.03   |          0.43    |
-| SaT(sat-12l-sm, do_ps=True)                    |            0.3        |         0.33        |            0.06   |          0.42    |
-| SaT(sat-3l, do_ps=False)                       |            __0.34__ ❗ |         0.28       |            0.03   |          0.42    |
-| SaT(sat-3l, do_ps=True)                        |            0.15       |         0.09        |            0.07   |          0.41    |
-| chonkIE SemanticChunker(bge-small-en-v1.5)     |            0.06       |         0.21        |            0.01   |          0.12    |
-| chonkIE SemanticChunker(potion-base-8M)        |            0.08       |         0.19        |            0.01   |          0.15    |
-| chonkIE RecursiveChunker                       |            0.02       |         0.07        |            0.01   |          0.05    |
-| langchain SemanticChunker(all-mpnet-base-v2)   |            0          |         0           |            0      |          0       |
-| langchain SemanticChunker(bge-small-en-v1.5)   |            0          |         0           |            0      |          0       |
-| langchain SemanticChunker(potion-base-8M)      |            0          |         0           |            0      |          0       |
-| langchain RecursiveChar                        |            0          |         0           |            0      |          0       |
-| llamaindex SemanticSplitter(bge-small-en-v1.5) |            0.02       |         0.06        |            0      |          0.06    |
+| Model                                          |          bookcorpus   |    en_judgements    |   paul_graham    | 20_newsgroups    |
+|------------------------------------------------|-----------------------|---------------------|------------------|------------------|
+| chonkY_modernbert_large_1                      |           __0.79__ ❗  |       __0.29__ ❗   |    __0.69__ ❗   | 0.17             |
+| chonkY_modernbert_base_1                       |           0.72        |            0.08     |          0.63    | 0.15             |
+| chonkY_distilbert_base_uncased_1               |           0.69        |            0.05     |          0.52    | 0.15             |
+| SaT(sat-12l-sm, do_ps=False)                   |           0.33        |            0.03     |          0.43    | 0.31             |
+| SaT(sat-12l-sm, do_ps=True)                    |           0.33        |            0.06     |          0.42    | 0.3              |
+| SaT(sat-3l, do_ps=False)                       |           0.28        |            0.03     |          0.42    |  __0.34__ ❗      |
+| SaT(sat-3l, do_ps=True)                        |           0.09        |            0.07     |          0.41    | 0.15             |
+| chonkIE SemanticChunker(bge-small-en-v1.5)     |           0.21        |            0.01     |          0.12    | 0.06             |
+| chonkIE SemanticChunker(potion-base-8M)        |           0.19        |            0.01     |          0.15    | 0.08             |
+| chonkIE RecursiveChunker                       |           0.07        |            0.01     |          0.05    | 0.02             |
+| langchain SemanticChunker(all-mpnet-base-v2)   |           0           |            0        |          0       | 0                |
+| langchain SemanticChunker(bge-small-en-v1.5)   |           0           |            0        |          0       | 0                |
+| langchain SemanticChunker(potion-base-8M)      |           0           |            0        |          0       | 0                |
+| langchain RecursiveChar                        |           0           |            0        |          0       | 0                |
+| llamaindex SemanticSplitter(bge-small-en-v1.5) |           0.06        |            0        |          0.06    | 0.02             |

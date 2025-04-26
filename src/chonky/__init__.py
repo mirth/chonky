@@ -16,7 +16,10 @@ class TextSplitter:
     def __init__(
         self, model_id="mirth/chonky_distilbert_uncased_1", device="cpu", **model_kwargs
     ):
-        if model_id == "mirth/chonky_modernbert_base_1":
+        if model_id in (
+            "mirth/chonky_modernbert_base_1",
+            "mirth/chonky_modernbert_large_1",
+        ):
             tokenizer_kwargs = {"model_max_length": 1024}
         else:
             tokenizer_kwargs = {}
