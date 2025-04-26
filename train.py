@@ -13,7 +13,7 @@ from transformers import (
 torch.set_float32_matmul_precision("high")
 
 
-def distilbert():
+def distilbert(model_name):
     id2label = {
         0: "O",
         1: "separator",
@@ -23,7 +23,6 @@ def distilbert():
         "separator": 1,
     }
 
-    model_name = "distilbert/distilbert-base-uncased"
     model = AutoModelForTokenClassification.from_pretrained(
         model_name, num_labels=2, id2label=id2label, label2id=label2id
     )
@@ -33,7 +32,7 @@ def distilbert():
     return model, tokenizer
 
 
-def modernbert():
+def modernbert(model_id):
     id2label = {
         0: "O",
         1: "separator",
@@ -42,28 +41,28 @@ def modernbert():
         "O": 0,
         "separator": 1,
     }
-    model_name = "answerdotai/ModernBERT-base"
 
     model = AutoModelForTokenClassification.from_pretrained(
-        model_name,
+        model_id,
         num_labels=2,
         id2label=id2label,
         label2id=label2id,
         _attn_implementation="flash_attention_2",
     )
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
 
     return model, tokenizer
 
 
-def main(batch_size, max_seq_len=None):
-    model, tokenizer = modernbert()
+def main(dataset_id, model_id, output_dir, batch_size, max_seq_len=None):
+    model, tokenizer = modernbert(model_id=model_id)
+    # model, tokenizer = distilbert(model_name=model_id)
 
     if max_seq_len is None:
         max_seq_len = tokenizer.model_max_length
 
-    dataset = load_from_disk("data/refined-bookcorpus-dataset_hf_split")
+    dataset = load_from_disk(dataset_id)
     print(dataset)
     dataset_val = dataset["test"]
     dataset_train = dataset["train"]
@@ -127,16 +126,17 @@ def main(batch_size, max_seq_len=None):
 
     data_collator = DataCollatorForTokenClassification(tokenizer=tokenizer)
     training_args = TrainingArguments(
-        output_dir="modernbert_bookcorpus_model",
+        output_dir=output_dir,
         learning_rate=2e-5,
         per_device_train_batch_size=batch_size,
         per_device_eval_batch_size=batch_size,
-        num_train_epochs=100,
+        num_train_epochs=25,
         weight_decay=0.01,
         eval_strategy="epoch",
         save_strategy="epoch",
         load_best_model_at_end=True,
         push_to_hub=False,
+        fp16=True,
     )
 
     trainer = Trainer(
@@ -153,4 +153,10 @@ def main(batch_size, max_seq_len=None):
 
 
 if __name__ == "__main__":
-    main(batch_size=80, max_seq_len=1024)
+    main(
+        dataset_id="data/refined-bookcorpus-dataset_hf_ModernBERT-base1024",
+        model_id="modernbert_large_minipile/checkpoint-54717",
+        output_dir="modernbert_large_minipile_plus_bookcorpus",
+        batch_size=64,
+        max_seq_len=1024,
+    )
