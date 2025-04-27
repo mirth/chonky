@@ -39,6 +39,23 @@ The first programs I tried writing were on the IBM 1401 that our school district
 --
 ```
 
+The usage pattern is the following: strip all the markup tags to produce pure text and feed this text into the splitter. For this purpose there is helper class `MarkupRemover` (it automatically detects the content format):
+
+
+```python
+from chonky.markup_remover import MarkupRemover
+from chonky import ParagraphSplitter
+
+remover = MarkupRemover()
+splitter = ParagraphSplitter()
+
+text = remover("# Header 1 ...")
+splitter(text)
+```
+
+Supported formats: `markdown`, `xml`, `html`.
+
+
 ## Supported models
 
 | Model ID                                                                                                 | Seq Length | Number of Params |
