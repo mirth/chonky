@@ -54,10 +54,33 @@ def modernbert(model_id):
 
     return model, tokenizer
 
+def mmbert(model_id):
+    id2label = {
+        0: "O",
+        1: "separator",
+    }
+    label2id = {
+        "O": 0,
+        "separator": 1,
+    }
+
+    model = AutoModelForTokenClassification.from_pretrained(
+        model_id,
+        num_labels=2,
+        id2label=id2label,
+        label2id=label2id,
+        # _attn_implementation="flash_attention_2",
+        # _attn_implementation='sdpa',
+    )
+
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+
+    return model, tokenizer
 
 def main(dataset_id, model_id, output_dir, batch_size, max_seq_len=None):
-    model, tokenizer = modernbert(model_id=model_id)
     # model, tokenizer = distilbert(model_name=model_id)
+    # model, tokenizer = modernbert(model_id=model_id)
+    model, tokenizer = mmbert(model_id=model_id)
 
     if max_seq_len is None:
         max_seq_len = tokenizer.model_max_length
@@ -130,11 +153,12 @@ def main(dataset_id, model_id, output_dir, batch_size, max_seq_len=None):
         learning_rate=2e-5,
         per_device_train_batch_size=batch_size,
         per_device_eval_batch_size=batch_size,
-        num_train_epochs=25,
+        num_train_epochs=1,
         weight_decay=0.01,
         eval_strategy="epoch",
-        save_strategy="epoch",
-        load_best_model_at_end=True,
+        save_strategy="steps",
+        save_steps=10000,
+        # load_best_model_at_end=True,
         push_to_hub=False,
         fp16=True,
     )
@@ -154,9 +178,9 @@ def main(dataset_id, model_id, output_dir, batch_size, max_seq_len=None):
 
 if __name__ == "__main__":
     main(
-        dataset_id="data/refined-bookcorpus-dataset_hf_ModernBERT-base1024",
-        model_id="modernbert_large_minipile/checkpoint-54717",
-        output_dir="modernbert_large_minipile_plus_bookcorpus",
-        batch_size=64,
+        dataset_id="data/bgp1_mmBERT-small1024",
+        model_id="jhu-clsp/mmBERT-small",
+        output_dir="runs/mmBERT-small_bgp1",
+        batch_size=16,
         max_seq_len=1024,
     )
