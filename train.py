@@ -69,7 +69,7 @@ def mmbert(model_id):
         num_labels=2,
         id2label=id2label,
         label2id=label2id,
-        # _attn_implementation="flash_attention_2",
+        _attn_implementation="flash_attention_2",
         # _attn_implementation='sdpa',
     )
 
@@ -158,6 +158,7 @@ def main(dataset_id, model_id, output_dir, batch_size, max_seq_len=None):
         eval_strategy="epoch",
         save_strategy="steps",
         save_steps=10000,
+        save_total_limit=3,
         # load_best_model_at_end=True,
         push_to_hub=False,
         fp16=True,
@@ -179,8 +180,8 @@ def main(dataset_id, model_id, output_dir, batch_size, max_seq_len=None):
 if __name__ == "__main__":
     main(
         dataset_id="data/bgp1_mmBERT-small1024",
-        model_id="jhu-clsp/mmBERT-small",
-        output_dir="runs/mmBERT-small_bgp1",
-        batch_size=16,
+        model_id="jhu-clsp/mmBERT-base",
+        output_dir="runs/mmBERT-base_bgp1",
+        batch_size=96,
         max_seq_len=1024,
     )
