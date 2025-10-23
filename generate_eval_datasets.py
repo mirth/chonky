@@ -2,14 +2,10 @@ from operator import itemgetter
 from collections import defaultdict
 import numpy as np
 import pandas as pd
-from datasets import Dataset
+from datasets import Dataset, load_from_disk
 
 
-def dataset_refined_bookcorpus():
-    from datasets import load_from_disk
-
-    ds = load_from_disk("data/refined-bookcorpus-dataset_hf_test")
-
+def dataset_handmade(ds):
     all_paragraphs = []
     for tokens, ner_tags in zip(ds["tokens"], ds["ner_tags"]):
         prev_tag_index = 0
@@ -48,6 +44,18 @@ def dataset_MultiLegalSBD_en_judgements():
     return all_paragraphs
 
 
+def project_gutenberg():
+    ds = load_from_disk("data/project_gutenberg_test")
+
+    langs = ["en", "de", "es", "fr", "it", "nl", "pl", "pt", "ru", "sv", "zh"]
+
+    datasets = []
+    for lang in langs:
+        datasets.append((f"project_gutenberg_{lang}", dataset_handmade(ds[lang])))
+
+    return datasets
+
+
 def hf_dataset_with_paragraphs(dataset_id, split):
     from datasets import load_dataset
 
@@ -81,7 +89,14 @@ def to_dict(paragraphs):
 
 def main():
     raw_datasets = [
-        ("bookcorpus", dataset_refined_bookcorpus()),
+        (
+            "bookcorpus",
+            dataset_handmade(
+                load_from_disk(
+                    "data/refined-bookcorpus-dataset_hf_mmBERT-small_with_punct1024_test"
+                )
+            ),
+        ),
         ("en_judgements", dataset_MultiLegalSBD_en_judgements()),
         (
             "paul_graham",
@@ -93,6 +108,7 @@ def main():
             "20_newsgroups",
             hf_dataset_with_paragraphs(dataset_id="SetFit/20_newsgroups", split="test"),
         ),
+        *project_gutenberg(),
     ]
 
     for dataset_name, paragraphs in raw_datasets:

@@ -1,5 +1,6 @@
 from collections import defaultdict
 from tqdm import tqdm
+import pandas as pd
 import evaluate
 from datasets import load_from_disk
 
@@ -209,7 +210,7 @@ def eval_loop(eval_dataset, models):
     return all_outputs, gts
 
 
-def pretty_print_metrics(all_metrics):
+def pretty_print_metrics(all_metrics, save_to=None):
     from operator import itemgetter
     from tabulate import tabulate
 
@@ -237,6 +238,8 @@ def pretty_print_metrics(all_metrics):
 
     print(tabulate(rows, headers=headers, tablefmt="github"))
 
+    if save_to is not None:
+        pd.DataFrame(data=rows, columns=headers).to_csv(save_to, index=False)
 
 def main():
     dataset_names = [
@@ -244,9 +247,29 @@ def main():
         "en_judgements",
         "paul_graham",
         "20_newsgroups",
+
+        'project_gutenberg_test_by_lang/project_gutenberg_en',
+        'project_gutenberg_test_by_lang/project_gutenberg_de',
+        'project_gutenberg_test_by_lang/project_gutenberg_es',
+        'project_gutenberg_test_by_lang/project_gutenberg_fr',
+        'project_gutenberg_test_by_lang/project_gutenberg_it',
+        'project_gutenberg_test_by_lang/project_gutenberg_nl',
+        'project_gutenberg_test_by_lang/project_gutenberg_pl',
+        'project_gutenberg_test_by_lang/project_gutenberg_pt',
+        'project_gutenberg_test_by_lang/project_gutenberg_ru',
+        'project_gutenberg_test_by_lang/project_gutenberg_sv',
+        'project_gutenberg_test_by_lang/project_gutenberg_zh',
     ]
 
     models = [
+        (
+            "chonkY_mmbert_small",
+            model_chonky(
+                model_id="mirth/chonky_mmbert_small_multilingual_1",
+                _attn_implementation="sdpa",
+                reference_compile=False,
+            ),
+        ),
         (
             "SaT(sat-12l-sm, do_ps=True)",
             model_sat("sat-12l-sm", do_paragraph_segmentation=True),
@@ -265,7 +288,15 @@ def main():
             model_chonky(model_id="mirth/chonky_distilbert_uncased_1"),
         ),
         (
-            "chonkY_modernbert",
+            "chonkY_modernbert_large",
+            model_chonky(
+                model_id="mirth/chonky_modernbert_large_1",
+                _attn_implementation="sdpa",
+                reference_compile=False,
+            ),
+        ),
+        (
+            "chonkY_modernbert_base",
             model_chonky(
                 model_id="mirth/chonky_modernbert_base_1",
                 _attn_implementation="sdpa",
@@ -319,7 +350,7 @@ def main():
             metrics = seqeval.compute(predictions=preds, references=gts)
             all_metrics[model_name].append((dataset_name, metrics))
 
-    pretty_print_metrics(all_metrics)
+    pretty_print_metrics(all_metrics, save_to='metrics/3.txt')
 
 
 if __name__ == "__main__":

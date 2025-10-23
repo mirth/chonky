@@ -19,6 +19,7 @@ class ParagraphSplitter:
         if model_id in (
             "mirth/chonky_modernbert_base_1",
             "mirth/chonky_modernbert_large_1",
+            "mirth/chonky_mmbert_small_multilingual_1",
         ):
             tokenizer_kwargs = {"model_max_length": 1024}
         else:
